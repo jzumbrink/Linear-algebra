@@ -4,9 +4,9 @@ from matrix import Matrix
 def solve_system_of_linear_equations(matrix: Matrix, right_side: Matrix):
     if matrix.count_rows == right_side.count_rows:
         for k in range(min(matrix.count_rows, matrix.count_columns)):
-            if sum([matrix.matrix[i][k] for i in range(k, matrix.count_rows)]) == 0:
-                for l in range(k+1, matrix.count_columns):
-                    if sum([matrix.matrix[i][l] for i in range(k, matrix.count_rows)]) != 0:
+            if matrix.is_zero_row(k):
+                for l in range(k+1, matrix.count_rows):
+                    if not matrix.is_zero_row(l):
                         # switch column k with column l
                         matrix = matrix.switch_columns(k, l)
                         break

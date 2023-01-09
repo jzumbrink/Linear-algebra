@@ -1,7 +1,5 @@
 import sys
 
-from linear_independence import maximum_linear_independence
-
 
 class Matrix:
 
@@ -97,10 +95,20 @@ class Matrix:
         matrix_array[row][column] = value
         return Matrix(self.count_rows, self.count_columns, matrix_array)
 
+    def is_zero_row(self, row) -> bool:
+        for value in self.matrix[row]:
+            if value != 0:
+                return False
+        return True
+
 
 def identity_matrix(count_rows: int, count_columns: int) -> Matrix:
     return Matrix(count_rows, count_columns,
                   [[1 if row_index == column_index else 0 for column_index in range(count_columns)] for row_index in range(count_rows)])
+
+
+def zero_matrix(count_rows: int, count_columns: int) -> Matrix:
+    return Matrix(count_rows, count_columns, [[0 for _ in range(count_columns)] for __ in range(count_rows)])
 
 
 if __name__ == "__main__":
@@ -145,6 +153,8 @@ if __name__ == "__main__":
 
     print((t1 * t2).switch_rows(1, 0))
     print(m1.concatenate(m2))
+    print(zero_matrix(2, 6).is_zero_row(1))
+    print(m1.is_zero_row(0))
     sys.exit()
     matrix = matrix * Matrix(matrix.count_columns, 1,
                              [[23] for i in range(matrix.count_columns)])
