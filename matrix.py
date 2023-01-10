@@ -8,6 +8,7 @@ class Matrix:
         self.count_columns = count_columns
         self.matrix = matrix
 
+    # The addition works only with another matrix of the same dimension
     def __add__(self, other):
         if type(other) == type(self):
             if self.count_rows == other.count_rows and self.count_columns == other.count_columns:
@@ -19,12 +20,16 @@ class Matrix:
         else:
             raise TypeError
 
+    # The subtraction uses the already implemented addition after multiplying the other element with -1
     def __sub__(self, other):
         if type(other) == type(self):
             return self.__add__(other * -1)
         else:
             raise TypeError
 
+    # This function implements both the matrix multiplication and the scalar multiplication.
+    # Please note that the scalar has to be the second element in the multiplication.
+    # (mathematically there is no difference)
     def __mul__(self, other):
         if type(other) == int or type(other) == float:
             return Matrix(self.count_rows, self.count_columns,
@@ -38,22 +43,25 @@ class Matrix:
         else:
             raise TypeError
 
-    def transponiert(self):
+    def transpose(self):
         return Matrix(self.count_columns, self.count_rows,
                       [[self.matrix[row_index][column_index] for row_index in range(self.count_rows)] for column_index in range(self.count_columns)])
 
-    def rank(self) -> int:
-        return maximum_linear_independence(self.get_column_vectors())
+    # set the value of a single cell
+    def set_value(self, row: int, column: int, value: int):
+        matrix_array = self.matrix.copy()
+        matrix_array[row][column] = value
+        return Matrix(self.count_rows, self.count_columns, matrix_array)
 
     def get_column_vectors(self) -> list:
-        return self.transponiert().matrix
+        return self.transpose().matrix
 
     def switch_columns(self, column_a: int, column_b: int):
         matrix_array: list = self.get_column_vectors()
         old_column_a = matrix_array[column_a].copy()
         matrix_array[column_a] = matrix_array[column_b].copy()
         matrix_array[column_b] = old_column_a
-        return Matrix(self.count_columns, self.count_rows, matrix_array).transponiert()
+        return Matrix(self.count_columns, self.count_rows, matrix_array).transpose()
 
     def switch_rows(self, row_a: int, row_b: int):
         matrix_array: list = self.matrix.copy()
@@ -78,28 +86,29 @@ class Matrix:
                     break
         return count
 
+    def multiply_row(self, to_multiplied_row_index: int, scalar):
+        new_matrix = [[self.matrix[row_index][column_index] * (1 if row_index != to_multiplied_row_index else scalar)
+                       for column_index in range(self.count_columns)] for row_index in range(self.count_rows)]
+        return Matrix(self.count_rows, self.count_columns, new_matrix)
+
+    def is_zero_row(self, row: int) -> bool:
+        for value in self.matrix[row]:
+            if value != 0:
+                return False
+        return True
+
+    def is_zero_column(self, column: int, start_row: int=0) -> bool:
+        for row in self.matrix[start_row:]:
+            if row[column] != 0:
+                return False
+        return True
+
     def __str__(self):
         str_columns = []
         for row_index in range(self.count_rows):
             str_columns.append("|{}|".format(" ".join(map(str, self.matrix[row_index]))))
 
         return "\n" + "\n".join(str_columns)
-
-    def multiply_row(self, to_multiplied_row_index: int, scalar):
-        new_matrix = [[self.matrix[row_index][column_index] * (1 if row_index != to_multiplied_row_index else scalar)
-                       for column_index in range(self.count_columns)] for row_index in range(self.count_rows)]
-        return Matrix(self.count_rows, self.count_columns, new_matrix)
-
-    def set_value(self, row: int, column: int, value: int):
-        matrix_array = self.matrix.copy()
-        matrix_array[row][column] = value
-        return Matrix(self.count_rows, self.count_columns, matrix_array)
-
-    def is_zero_row(self, row) -> bool:
-        for value in self.matrix[row]:
-            if value != 0:
-                return False
-        return True
 
 
 def identity_matrix(count_rows: int, count_columns: int) -> Matrix:
@@ -121,23 +130,23 @@ if __name__ == "__main__":
     t1 = Matrix(3, 2, [[2, 5], [1, 0], [3, 1]])
     t2 = Matrix(2, 5, [[8, 1, 2, 3, 0], [0, 2, 4, 0, 1]])
     print(t1 * t2 * 0)
-    print(t1.transponiert())
+    print(t1.transpose())
     print(m1)
-    print(m1.transponiert())
+    print(m1.transpose())
 
     print("Test")
-    print((m1+m2).transponiert())
-    print(m1.transponiert() + m2.transponiert())
+    print((m1+m2).transpose())
+    print(m1.transpose() + m2.transpose())
 
     print("Test")
-    print((t1 * 3).transponiert())
-    print(t1.transponiert() * 3)
+    print((t1 * 3).transpose())
+    print(t1.transpose() * 3)
 
     print("Test")
-    print((t1 * t2).transponiert())
-    print(t2.transponiert() * t1.transponiert())
+    print((t1 * t2).transpose())
+    print(t2.transpose() * t1.transpose())
 
-    print(t1.transponiert().transponiert())
+    print(t1.transpose().transpose())
 
     print(t1.get_column_vectors())
 
@@ -155,8 +164,3 @@ if __name__ == "__main__":
     print(m1.concatenate(m2))
     print(zero_matrix(2, 6).is_zero_row(1))
     print(m1.is_zero_row(0))
-    sys.exit()
-    matrix = matrix * Matrix(matrix.count_columns, 1,
-                             [[23] for i in range(matrix.count_columns)])
-    mult_matrix = 2
-    print(matrix)
