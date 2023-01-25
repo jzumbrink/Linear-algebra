@@ -1,6 +1,3 @@
-import sys
-
-
 class Matrix:
 
     def __init__(self, count_rows: int, count_columns: int, matrix: list):
@@ -102,6 +99,14 @@ class Matrix:
             if row[column] != 0:
                 return False
         return True
+
+    def diagonal_product(self) -> float:
+        # helpful for calculating the determinant of the matrix
+        result = 1
+        for i in range(min(self.count_rows, self.count_columns)):
+            result *= self.matrix[i][i]
+
+        return result
 
     def __str__(self):
         str_columns = []
