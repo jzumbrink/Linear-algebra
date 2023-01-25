@@ -13,7 +13,7 @@ def gaussian_elimination(matrix: Matrix, right_side: Matrix, options: dict = {})
     if matrix.count_rows == right_side.count_rows:
         for k in range(min(matrix.count_rows, matrix.count_columns)):
             # E4
-            if matrix.is_zero_column(k, k):
+            if matrix.is_zero_column(k, k) and ("block" not in options or "E4" not in options["block"]):
                 for l in range(k + 1, matrix.count_rows):
                     if not matrix.is_zero_column(l, k + 1):
                         # switch column k with column l
@@ -24,12 +24,14 @@ def gaussian_elimination(matrix: Matrix, right_side: Matrix, options: dict = {})
                     break
 
             # E1
-            if matrix.matrix[k][k] == 0:
+            if matrix.matrix[k][k] == 0 and ("block" not in options or "E1" not in options["block"]):
                 for l in range(k + 1, matrix.count_rows):
                     if matrix.matrix[l][k] != 0:
                         # swap row k with row l
                         matrix = matrix.switch_rows(k, l)
                         right_side = right_side.switch_rows(k, l)
+                        if "count_row_changes" in options:
+                            options["count_row_changes"] += 1
                         break
                 else:
                     # should never be triggered
@@ -42,12 +44,13 @@ def gaussian_elimination(matrix: Matrix, right_side: Matrix, options: dict = {})
                 right_side = right_side.multiply_row(k, current_diagonal_value)
 
             # E3
-            for i in range(k + 1, matrix.count_rows):
-                if matrix.matrix[i][k] != 0:
-                    matrix -= Matrix(matrix.count_rows, matrix.count_columns,
-                                     [[0 for _ in range(matrix.count_columns)] if row_index != i else matrix.matrix[k]
-                                      for row_index in range(matrix.count_rows)]) * matrix.matrix[i][k] * (1/matrix.matrix[k][k])
-                    right_side = right_side.set_value(i, 0, right_side.matrix[i][0] - right_side.matrix[k][0])
+            if "block" not in options or "E3" not in options["block"]:
+                for i in range(k + 1, matrix.count_rows):
+                    if matrix.matrix[i][k] != 0:
+                        matrix -= Matrix(matrix.count_rows, matrix.count_columns,
+                                         [[0 for _ in range(matrix.count_columns)] if row_index != i else matrix.matrix[k]
+                                          for row_index in range(matrix.count_rows)]) * matrix.matrix[i][k] * (1/matrix.matrix[k][k])
+                        right_side = right_side.set_value(i, 0, right_side.matrix[i][0] - right_side.matrix[k][0])
 
         return matrix, right_side
     else:

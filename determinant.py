@@ -3,7 +3,8 @@ from gauss import *
 
 
 def determinant(m: Matrix) -> float:
-    return gaussian_elim(m, {"block": ["E2"]}).diagonal_product()
+    options = {"block": ["E2", "E4"], "count_row_changes": 0}
+    return gaussian_elim(m, options).diagonal_product() * (-1)**options["count_row_changes"]
 
 
 if __name__ == "__main__":
